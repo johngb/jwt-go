@@ -3,6 +3,7 @@ package jwt
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -86,7 +87,8 @@ func (t *Token) SigningString() (string, error) {
 func Parse(tokenString string, keyFunc Keyfunc) (*Token, error) {
 	parts := strings.Split(tokenString, ".")
 	if len(parts) != 3 {
-		return nil, &ValidationError{err: "token contains an invalid number of segments", Errors: ValidationErrorMalformed}
+		errString := fmt.Sprintf("token contains an invalid number of segments. TokenString: %q", tokenString)
+		return nil, &ValidationError{err: errString, Errors: ValidationErrorMalformed}
 	}
 
 	var err error
