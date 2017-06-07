@@ -9,10 +9,12 @@ import (
 	"time"
 )
 
+const expiredTolerance = 24 * 60 * 60 * 1000 // 1 day in ms
+
 // TimeFunc provides the current time when parsing token to validate "exp" claim (expiration time).
 // You can override it to use another time value.  This is useful for testing or if your
 // server uses a different time zone than your tokens.
-var TimeFunc = time.Now
+var TimeFunc = time.Now().UTC
 
 // Parse methods use this callback function to supply
 // the key for verification.  The function receives the parsed,
@@ -135,7 +137,7 @@ func Parse(tokenString string, keyFunc Keyfunc) (*Token, error) {
 	vErr := &ValidationError{}
 	now := TimeFunc().Unix()
 	if exp, ok := token.Claims["exp"].(float64); ok {
-		if now > int64(exp) {
+		if now > (int64(exp) + expiredTolerance) {
 			vErr.err = "token is expired"
 			vErr.Errors |= ValidationErrorExpired
 		}
